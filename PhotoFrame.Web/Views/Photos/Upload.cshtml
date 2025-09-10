@@ -1,0 +1,66 @@
+@model PhotoFrame.Web.Models.PhotoUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Photo";
+}
+
+<h1>Upload Photo</h1>
+
+<h4>Upload a new photo for the frame</h4>
+<hr />
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="PhotoFile" class="form-label"></label>
+                <input asp-for="PhotoFile" class="form-control" type="file" accept="image/*" />
+                <span asp-validation-for="PhotoFile" class="text-danger"></span>
+                <div class="form-text">Supported formats: JPG, PNG, BMP, GIF. Images will be automatically resized and optimized for the e-ink display (1872×1404, 16-color grayscale).</div>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Optional - will use filename if not provided" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Upload & Process" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Processing Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Target Resolution:</strong> 1872 × 1404 pixels</p>
+                <p><strong>Color Depth:</strong> 16-level grayscale</p>
+                <p><strong>Processing:</strong> Floyd-Steinberg dithering</p>
+                <p><strong>Aspect Ratio:</strong> Preserved with white background fill</p>
+                <hr>
+                <p class="text-muted">
+                    Your photos will be automatically processed to optimize them for the e-ink display. 
+                    The original files are preserved, and processed versions are created specifically for the frame.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

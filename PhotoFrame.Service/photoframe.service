@@ -1,0 +1,30 @@
+[Unit]
+Description=PhotoFrame Display Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=notify
+ExecStart=/usr/local/bin/photoframe-service
+Restart=always
+RestartSec=10
+User=pi
+Group=pi
+Environment=DOTNET_ENVIRONMENT=Production
+WorkingDirectory=/var/lib/photoframe
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=photoframe
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/photoframe /var/www/photoframe
+
+# GPIO and SPI access
+SupplementaryGroups=gpio spi
+
+[Install]
+WantedBy=multi-user.target

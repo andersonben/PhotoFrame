@@ -1,41 +1,80 @@
 ﻿@model IEnumerable<PhotoFrame.Data.Entities.Photo>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Photos";
 }
 
-<h1>Index</h1>
+<h1>Photo Management</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Path)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Path)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.PhotoId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.PhotoId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.PhotoId">Delete</a>
-            </td>
-        </tr>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a asp-action="Upload" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload Photo
+        </a>
+        <a asp-action="Create" class="btn btn-secondary">
+            <i class="fas fa-plus"></i> Add Manually
+        </a>
+    </div>
+    <div class="text-muted">
+        Total Photos: @Model.Count() | Active: @Model.Count(p => p.IsActive)
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <h4>No photos uploaded yet</h4>
+        <p>Get started by uploading your first photo using the "Upload Photo" button above.</p>
+    </div>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="row">
+        @foreach (var item in Model.OrderByDescending(p => p.UploadedAt))
+        {
+            <div class="col-md-4 col-lg-3 mb-4">
+                <div class="card">
+                    @if (!string.IsNullOrEmpty(item.ProcessedPath))
+                    {
+                        <img src="@item.ProcessedPath" class="card-img-top" alt="@item.Name" style="height: 200px; object-fit: contain; background-color: #f8f9fa;">
+                    }
+                    else
+                    {
+                        <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background-color: #f8f9fa;">
+                            <i class="fas fa-image fa-3x text-muted"></i>
+                        </div>
+                    }
+                    <div class="card-body">
+                        <h6 class="card-title">@item.Name</h6>
+                        <small class="text-muted">
+                            <div>Uploaded: @item.UploadedAt.ToString("MMM dd, yyyy")</div>
+                            <div>Size: @item.OriginalWidth × @item.OriginalHeight</div>
+                            @if (item.DisplayCount > 0)
+                            {
+                                <div>Displayed: @item.DisplayCount times</div>
+                                <div>Last shown: @item.LastDisplayed.ToString("MMM dd, yyyy")</div>
+                            }
+                        </small>
+                    </div>
+                    <div class="card-footer">
+                        <div class="btn-group w-100" role="group">
+                            <a asp-action="Details" asp-route-id="@item.PhotoId" class="btn btn-sm btn-outline-primary">Details</a>
+                            <a asp-action="Edit" asp-route-id="@item.PhotoId" class="btn btn-sm btn-outline-secondary">Edit</a>
+                            <a asp-action="Delete" asp-route-id="@item.PhotoId" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </div>
+                        <div class="mt-2">
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

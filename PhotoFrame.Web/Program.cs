@@ -2,11 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using PhotoFrame.Web.Data;
 using PhotoFrame.Data;
+using PhotoFrame.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var photoContext = new PhotoFrameDbContext();
-photoContext.Database.EnsureCreated();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("IdentityConnection");
@@ -14,13 +12,28 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => {
     options.UseSqlite(connectionString);
 });
 
+// Add PhotoFrame database context
+builder.Services.AddDbContext<PhotoFrameDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("PhotoFrameConnection") ?? 
+                     "Data Source=photos.db"));
+
+// Add custom services
+builder.Services.AddScoped<ImageProcessingService>();
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
+// Ensure PhotoFrame database is created
+using (var scope = app.Services.CreateScope())
+{
+    var photoContext = scope.ServiceProvider.GetRequiredService<PhotoFrameDbContext>();
+    photoContext.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
